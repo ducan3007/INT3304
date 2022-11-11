@@ -1,8 +1,8 @@
 from bingo import Bingo
-
+from colorama import Fore, Back, Style
 
 class colors:
-    pass
+   pass
 
 
 class Render:
