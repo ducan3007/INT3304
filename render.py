@@ -8,8 +8,10 @@ class colors:
 class Render:
     def __init__(self, bingo: Bingo):
         self.bingo = Bingo
-
+        print("ae")
     def gameRender(self, board, history, curr):
         pass
+
+
 
     # viêt thêm nữa

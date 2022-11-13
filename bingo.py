@@ -2,6 +2,7 @@ import os
 from re import X
 import numpy as np
 import random
+from colorama import Fore, Back, Style
 
 
 class Bingo:
@@ -78,10 +79,10 @@ class Bingo:
 
     def printBoard(self):
         print(self.game_board)
-        num = 14
-        a, b = self.pos(num)
-        print('x: ', a, 'y: ', b)
-        self.update(a, b, num)
+       # num = 14
+       # a, b = self.pos(num)
+       # print('x: ', a, 'y: ', b)
+       # self.update(a, b, num)
         print(self.game_info)
         print(self.history)
         print(self.isWin())
@@ -90,3 +91,21 @@ class Bingo:
 Bingo = Bingo(5)
 Bingo.board()
 Bingo.printBoard()
+
+while (Bingo.isWin() == False):
+    mark = int(input("Nhập số cần đánh dấu "))
+    a, b = Bingo.pos(mark)
+    print('a: ', a,'b: ', b)
+    Bingo.update(a, b, mark)
+    print(Bingo.game_info)
+
+    #in bảng sau mỗi lần nhập
+    for i in range(Bingo.x):
+        for j in range(Bingo.x):
+            if (Bingo.game_board[i][j] in Bingo.history):
+               print(Fore.RED + str(Bingo.game_board[i][j]) + Style.RESET_ALL, end = " ")
+            else:
+               print(Bingo.game_board[i][j], end = " ")
+        print()
+
+print("Win!")
