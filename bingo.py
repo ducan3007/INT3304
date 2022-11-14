@@ -79,25 +79,24 @@ class Bingo:
 
     def printBoard(self):
         print(self.game_board)
-       # num = 14
-       # a, b = self.pos(num)
-       # print('x: ', a, 'y: ', b)
-       # self.update(a, b, num)
+        num = 14
+        a, b = self.pos(num)
+        print('x: ', a, 'y: ', b)
+        self.update(a, b, num)
         print(self.game_info)
         print(self.history)
         print(self.isWin())
 
-
-Bingo = Bingo(5)
+matrix = int(input("Nhập kích thước mảng "))
+Bingo = Bingo(matrix)
 Bingo.board()
-Bingo.printBoard()
+print(Bingo.game_board)
+#Bingo.printBoard()
 
 while (Bingo.isWin() == False):
     mark = int(input("Nhập số cần đánh dấu "))
     a, b = Bingo.pos(mark)
-    print('a: ', a,'b: ', b)
     Bingo.update(a, b, mark)
-    print(Bingo.game_info)
 
     #in bảng sau mỗi lần nhập
     for i in range(Bingo.x):
