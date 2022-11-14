@@ -1,5 +1,3 @@
-import os
-from re import X
 import numpy as np
 import random
 from colorama import Fore, Back, Style
@@ -9,7 +7,7 @@ class Bingo:
     def __init__(self, x):
 
         # Số hàng và cột
-        self.x = x
+        self.x = int(x)
 
         # Lưu lịch sử
         self.history = dict()  # {num: (pos_x, pos_y)}
@@ -63,48 +61,75 @@ class Bingo:
 
     # Thắng khi có 5 đường thẳng
     def isWin(self):
+        lines = 0
         for i in range(self.x):
             if self.game_info["row"][i] == self.x:
-                self.lines += 1
+                lines += 1
             if self.game_info["col"][i] == self.x:
-                self.lines += 1
+                lines += 1
             if (i < 2):
                 if self.game_info["cross"][i] == self.x:
-                    self.lines += 1
+                    lines += 1
 
-        if self.lines >= 1:
-            return True
+        if lines >= self.x:
+            return lines
 
         return False
 
     def printBoard(self):
-        print(self.game_board)
-        num = 14
-        a, b = self.pos(num)
-        print('x: ', a, 'y: ', b)
-        self.update(a, b, num)
-        print(self.game_info)
-        print(self.history)
-        print(self.isWin())
+        print("BINGO: ")
+        for i in range(self.x):
+            for j in range(self.x):
+                if (self.game_board[i][j] in self.history):
+                    print(Fore.RED + str(self.game_board[i][j]) + Style.RESET_ALL, end=" ")
+                else:
+                    print(self.game_board[i][j], end=" ")
+            print()
 
-matrix = int(input("Nhập kích thước mảng "))
-Bingo = Bingo(matrix)
-Bingo.board()
-print(Bingo.game_board)
-#Bingo.printBoard()
+    def validate(self, num):
+        if num.strip().isdigit() is not True:
+            return 'INVALID'
 
-while (Bingo.isWin() == False):
-    mark = int(input("Nhập số cần đánh dấu "))
-    a, b = Bingo.pos(mark)
-    Bingo.update(a, b, mark)
+        if int(num) in self.history:
+            return 'DUPLICATE'
 
-    #in bảng sau mỗi lần nhập
-    for i in range(Bingo.x):
-        for j in range(Bingo.x):
-            if (Bingo.game_board[i][j] in Bingo.history):
-               print(Fore.RED + str(Bingo.game_board[i][j]) + Style.RESET_ALL, end = " ")
-            else:
-               print(Bingo.game_board[i][j], end = " ")
-        print()
+        return int(num)
 
-print("Win!")
+
+if __name__ == '__main__':
+
+    matrix = input("Nhập kích thước mảng ")
+
+    while matrix.strip().isdigit() is not True:
+
+        matrix = input("Nhập kích thước mảng ")
+        print(type(matrix))
+
+    Bingo = Bingo(int(matrix))
+    Bingo.board()
+    Bingo.printBoard()
+
+    while True:
+        _input = input("Nhập số cần đánh dấu ")
+
+        valid = Bingo.validate(_input)
+
+        if (valid == 'INVALID'):
+            print('Đầu vào ko hợp lệ')
+            continue
+        if (valid == 'DUPLICATE'):
+            print('Số đã được chọn')
+            continue
+
+        a, b = Bingo.pos(valid)
+        
+        Bingo.update(a, b, valid)
+
+        # in bảng sau mỗi lần nhập
+        Bingo.printBoard()
+        print('lines: ', Bingo.isWin())
+
+        if (Bingo.isWin() is not False):
+            break
+
+    print("Win!")

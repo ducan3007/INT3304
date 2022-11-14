@@ -1,6 +1,7 @@
 import threading
 import socket
-from render import Render
+from time import sleep
+# from render import Render
 from random import randint
 from bingo import Bingo
 from enum import Enum
@@ -9,7 +10,7 @@ from struct import *
 
 hostname = socket.gethostname()
 
-HOST = '112.137.129.129'
+HOST = 'localhost'
 PORT = 27003
 KEY = 'flag{1234567890}'
 
@@ -25,23 +26,29 @@ class PKT(Enum):
     END = 7
 
 
+clients = dict()
+
+
 class ClientThread(threading.Thread):
-    def __init__(self, conn, address: str, bingo: Bingo):
+    def __init__(self, conn, address: str):
         threading.Thread.__init__(self)
         self.conn = conn
         self.address = address
-        self.bingo = bingo(5)
-        self.render = Render(self.bingo)
+        self.bingo = Bingo(5)
 
+        # self.render = Render(self.bingo)
+
+        # num = int(input("Nhập kích thước mảng"))
         try:
             while True:
+                self.data = conn.recv(1024)
 
-                '''
-                    Gọi Bingo trong này để update thông tin (board, history, current_move)
-                    Sau đó Truyền bingo vào Render để render game ra console
-                '''
+                # room_id = self.data.decode()
 
-                if (Bingo.isGameOver):
+                print('echo', self.data)
+                self.conn.send(self.data)
+
+                if (Bingo.isWin()):
                     break
 
             self.conn.close()
@@ -51,9 +58,7 @@ class ClientThread(threading.Thread):
             print(e)
             self.conn.close()
 
-    # hàm định nghĩa giao thức
     def decode_message(package):
-        # return (type,data)
         pass
 
 
@@ -69,3 +74,9 @@ class Server:
     def start_server(self):
         conn, address = self.server.accept()
         threading.Thread(target=ClientThread, args=(conn, address[1])).start()
+
+
+if __name__ == '__main__':
+    server = Server()
+    while True:
+        server.start_server()
