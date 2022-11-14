@@ -31,13 +31,13 @@ Render bảng -> Bắt nhập số hàng cột -> Bảng -> Chọn số -> Valid
 + e (int 4 byte, độ dài author), 
 + author (string)
 ]
-	A nhận thông tin từ S: 
+	`A` nhận thông tin từ `S`: 
 + nếu chấp nhận thì gửi [1(int 4 byte)], 
 + còn không nhận thì [0(int 4 byte), error(thông tin lỗi)]
 
 ### b2. 
-sau khi A có thông tin của 1 game S. bước tiếp theo là 2 User cần có 1 match và thông tin của match đó để chơi. 
-	A sẽ gửi yêu cầu S bắt đầu 1 trận đấu với thông tin.[
+sau khi `A` có thông tin của 1 game `S`. bước tiếp theo là 2 User cần có 1 match và thông tin của match đó để chơi. 
+	`A` sẽ gửi yêu cầu `S` bắt đầu 1 trận đấu với thông tin.[
 + action(int 4byte, tạo match thì action =1),
 + matchId(int 4 byte),
 + uid1(int 4 byte), 
@@ -50,13 +50,11 @@ sau khi A có thông tin của 1 game S. bước tiếp theo là 2 User cần c�
 + nếu không thành công gửi cho `A`[0(int 4 byte), error(string, thông tin lỗi)]
 
 ### b3. 
-Khi `A` nhận thông tin từ `B` là 1 thì `A` gửi thông tin ip, port, keymatch cho 2 User.
-
-
+Khi `A` nhận thông tin từ `S` là 1 thì `A` gửi thông tin `ip, port, keymatch cho 2 User`.
 
 
 ### b4. 
-User truy cập vào `ip,port` của `S` do `A` cung cấp. 
+User truy cập vào `ip, port` của `S` do `A` cung cấp. 
 Sau đó User nhập thông tin `uid` và `keymatch` của mình cho `S` để chơi game.
 ( Khi nhập uid thì `S` phải phân biệt kết nối nào là của user nào tiện cho việc tính điểm và trả lại kết quả)
 
