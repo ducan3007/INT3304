@@ -72,7 +72,7 @@ class Bingo:
                 if self.game_info["cross"][i] == self.x:
                     self.lines += 1
 
-        if self.lines >= self.x:
+        if self.lines >= 1:
             return True
 
         return False
