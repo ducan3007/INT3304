@@ -34,16 +34,18 @@ Bingos = dict()
 '''
 Flows: CÓ THỂ KHÔNG ĐÚNG, phải làm mới biết dc. 
 
-Làm sao để client1 biết là đến lượt chọn của mình, khi mà client2 đã chọn xong nước đi ? => Lưu lại socket của tất cả client.
+Làm sao để Server chủ động push cho client1 biết là đến lượt chọn của mình, khi mà client2 đã chọn xong nước đi ? => Các client ở Thread khác nhau ? 
+ => Lưu lại socket của tất cả client ở Global 
 
 + Đầu tiên ta cần mã phòng (zoom_id) cho 2 Client, mã có thể auto tạo ở phía Server, hoặc một trong hai Client yêu cầu tạo mã phòng để lấy mã.
 
-+ Mã phòng sẽ lưu vào dict Clients ở trên: với key là mã phòng, value là mảng [(uuid1, socket_client1), (uuid2, socket_client2)]. Dựa vào uuid để xác định Client nào.
++ Mã phòng sẽ lưu vào dict Clients ở trên: với key chính là Mã phòng, value là 1 mảng [(uuid1, socket_client1), (uuid2, socket_client2)]. Dựa vào uuid để xác định Client nào.
 
 + Tại sao cần mã phòng và lưu vào Clients trên?
  
-=> Để broadcast, ví dụ client2 gửi gói update game, lúc này nếu ko lưu lại socket của client1 thì chỉ có socket_client2 nhận được update. 
-Vì socket_clinet1 ở một Thread khác. ( CODE tham khảo boardcast ở trong ./sample/chat_broadcast )
+=> Để broadcast đến tất cả Client khi có update mới nhất, ví dụ client2 gửi gói update game, lúc này nếu ko lưu lại socket của client1 thì chỉ có socket_client2 nhận được update từ Server.  
+
+Client1 vẫn chưa biết gì vì socket_clinet1 ở một Thread khác. ( CODE tham khảo boardcast ở trong ./sample/chat_broadcast )
 
 + Server sẽ dựa vào mã phòng để gửi thông tin mới update cho tất cả người chơi dùng trong phòng đó.
 
