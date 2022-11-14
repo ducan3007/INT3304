@@ -14,7 +14,6 @@ TYPES = (
     b'\x04\x00\x00\x00',  # 4
 )
 
-
 class Client:
     def __init__(self, host=HOST, port=PORT):
         self.host = host
