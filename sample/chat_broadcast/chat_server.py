@@ -13,6 +13,7 @@ server.listen()
 # Lists For Clients and Their Nicknames
 clients = []
 nicknames = []
+turn = 1
 
 # Sending Messages To All Connected Clients
 
@@ -25,11 +26,14 @@ def broadcast(message):
 
 
 def handle(client):
+    global turn
     while True:
         try:
             # Broadcasting Messages
             message = client.recv(1024)
-            broadcast(message)
+            print('current turn: ', turn)
+            turn = message
+            broadcast(turn)
         except:
             # Removing And Closing Clients
             index = clients.index(client)

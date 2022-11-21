@@ -26,10 +26,7 @@ class PKT(Enum):
     END = 7
 
 
-# Để ý hai cái này
-Clients = dict()
-
-Bingos = dict()
+# Biến Global Dùng để lưu thông tin game của các room
 
 '''
 Flows: CÓ THỂ KHÔNG ĐÚNG, phải làm mới biết dc. 
@@ -69,8 +66,22 @@ Bingos[zoom_id] = (),  # Lưu trạng thái chung của bàn chơi, tránh cheat
 
 '''
 
+# Để ý hai cái này
+# Biến Globlal Dùng để lưu các cặp (socket_client 1,socket_client 2) theo room
+Clients = dict()
+
+# Biến Global Dùng để lưu các bàn chơi theo room
+Bingos = dict()
+
+#
+MessageQueue = dict()
+
 
 class ClientThread(threading.Thread):
+    global Clients
+    global Bingos
+    global MessageQueue
+
     def __init__(self, conn, address: str):
         threading.Thread.__init__(self)
         self.conn = conn
@@ -80,12 +91,13 @@ class ClientThread(threading.Thread):
         # uuid của Clien tại thread này
         self.uuid = ''
 
+        self.msg_queue = []
+
         # self.render = Render(self.bingo)
 
         # num = int(input("Nhập kích thước mảng"))
         try:
             while True:
-                self.data = conn.recv(1024)
 
                 # 1. nhận gói tạo tham gia game với zoom_id
 
@@ -99,11 +111,20 @@ class ClientThread(threading.Thread):
 
                 ''' 4.
                 Nhận gói tin chọn số từ Client1, Validate nó, 
-                
+
                 Cập nhật Bingo của Client1, cập nhật next_turns,
-                
+
                 Boardcast thông tin đến tất cả Client trong zoom
                 '''
+                self.data = conn.recv(1024)
+
+                # if self.get_type(data) == '0':
+                #     pass
+
+                print(self.data.decode())
+                self.msg_queue.append(self.data.decode())
+                sleep(2)
+                conn.send(self.msg_queue.pop().encode())
                 pass
 
             self.conn.close()
@@ -112,6 +133,9 @@ class ClientThread(threading.Thread):
         except Exception as e:
             print(e)
             self.conn.close()
+
+    def get_type(self, package):
+        pass
 
     def decode_message(package):
         pass
