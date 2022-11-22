@@ -1,6 +1,5 @@
 import numpy as np
-from socket_server import Server
-
+import sys
 
 def print_format_table():
     """
@@ -16,12 +15,10 @@ def print_format_table():
         print('\n')
 
 
-# print_format_table()
-
 if __name__ == '__main__':
-    server = Server()
-    while True:
-        server.start_server()
 
+    print_format_table()
+    sys.stdout.write(f'\x1b[6;37;42m 1 \x1b[0m')
+    sys.stdout.write('\x1b[4;37;41m 1 \x1b[0m')
 
 # Compare threading.Thread vs
