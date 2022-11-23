@@ -6,19 +6,12 @@ import protocol
 from time import sleep
 from bingo import Bingo
 import sys
-event = threading.Event()
+import json
 
 HOST = 'localhost'
 PORT = 27003
-ID = '19020202'
 SECRET_KEY = '12345678'
-TYPES = (
-    b'\x00\x00\x00\x00',  # 0
-    b'\x01\x00\x00\x00',  # 1
-    b'\x02\x00\x00\x00',  # 2
-    b'\x03\x00\x00\x00',  # 3
-    b'\x04\x00\x00\x00',  # 4
-)
+
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((HOST, PORT))
@@ -33,6 +26,14 @@ ReceivedThread = False
 bingo = Bingo(5)
 
 
+def red(str):
+    return f'\x1b[7;30;41m {str} \x1b[0m'
+
+
+def green(str):
+    return f'\x1b[7;30;42m{str} \x1b[0m'
+
+
 class GameState:
     def __init__(self):
         self.won = False
@@ -42,7 +43,7 @@ class GameState:
 state = GameState()
 
 
-def send_pkt_hello():
+def send_pkt_hello():  # khởi tạo kết nối
     type = int.to_bytes(0, 4, 'little')
     print(SECRET_KEY)
     client.sendall(type + SECRET_KEY.encode())
@@ -62,58 +63,68 @@ def receive():
             match TYPE:
                 case 200:  # Khởi tạo
                     _len = protocol._get_ints(message[4:8])
-                    sys.stdout.write("\r{} {} \n".format('200 :', message[8:8 + _len].decode()))
+                    sys.stdout.write("\r{} {} \n".format(f'{green(200)} :', message[8:8 + _len].decode()))
 
                 case 100:  # Gói tin boardcast
                     len = protocol._get_ints(message[4:8])
-                    sys.stdout.write("\r{} {} \n".format('100 :', protocol._get_str(message[8:8+len])))
+                    sys.stdout.write("\r{} {} \n".format(f'{green(100)} :', protocol._get_str(message[8:8+len])))
 
-                case 201:  # Gói tin bắt đầu game
+                case 201:  # Server trả về Gói tin bắt đầu game
                     bingo.x = protocol.deserialize_matrix(message[4:])[0]
                     bingo.game_board = protocol.deserialize_matrix(message[4:])[1]
                     bingo.printBoard()
-                    sys.stdout.write("\r{} {} \n".format("(won, can choose):", state.won, state.can_choose))
+                    sys.stdout.write("\r{} {} \n".format("(Won, Can choose):", state.won, state.can_choose))
 
                     client.send(protocol.get_next_move())
 
-                case 202:  # Gói tin đến lượt
-                    sys.stdout.write("\r{} {} \n".format('202 :', 'Đến lượt bạn: !'))
+                case 202:  # Server trả về Gói tin đến lượt
+                    sys.stdout.write("\r{} {} \n".format(f'{green(202)} :', 'Đến lượt bạn: !'))
                     state.can_choose = True
                     ReceivedThread = True
 
                 case 205:  # Gói tin update nước đi
                     n = protocol._get_ints(message[4:8])
-                    sys.stdout.write("\r{} {} \n".format('205 :', f'Đối thủ chọn {n}!'))
+                    sys.stdout.write("\r{} {} \n".format(f'{green(205)} :', f'Đối thủ chọn {n}!'))
                     bingo.update_and_print(int(n))
 
+                case 222:  # Hiển thị kết quả của người choi còn lại, data là matrix và history
+                    sys.stdout.write("\r{} {} \n".format(f'{green(222)} :', f'Kết quả của đối thủ'))
+
+                    n = protocol._get_ints(message[4:8])
+                    matrix = protocol.deserialize_matrix(message[8:8+n])
+
+                    m = protocol._get_ints(message[8+n:12+n])
+                    history_temp = json.loads(message[12+n:12+n+m].decode())
+
+                    history = dict()
+
+                    for i in history_temp:
+                        history[int(i)] = (history_temp[i][0], history_temp[i][1])
+
+                    opponent_bingo = Bingo(matrix[0])
+                    opponent_bingo.game_board = matrix[1]
+                    opponent_bingo.history = history
+                    opponent_bingo.printBoard()
+
+                    state.won = True
+                    ReceivedThread = True
+                    sys.exit()
+
                 case 401:
-                    sys.stdout.write("\r{} \n".format('401 : Chưa đến lượt !'))
+                    sys.stdout.write("\r{} \n".format(f'{red(401)} : Chưa đến lượt !'))
                     state.can_choose = False
 
                 case 999:
-                    state.won = True
-                    sys.stdout.write("\r{} \n".format('999 : Bạn thắng !.'))
-                    ReceivedThread = True
-                    sys.exit()
+                    sys.stdout.write("\r{} \n".format(f'{green(999)} : Bạn thắng !.'))
 
                 case 888:
-                    state.won = True
-                    sys.stdout.write("\r{} \n".format('888 : Hòa.'))
-                    ReceivedThread = True
-                    sys.exit()
+                    sys.stdout.write("\r{} \n".format(f'{green(999)} : Hòa.'))
 
                 case 777:
-                    state.won = True
-                    sys.stdout.write('777 :THUA !.')
-                    ReceivedThread = True
-                    sys.exit()
+                    sys.stdout.write(f'{red(777)} : THUA !')
 
                 case 400:  # Gói tin từ request
                     sys.stdout.write("\r{} {} \n".format('400 :Connection rejected'))
-                    client.close()
-
-                case 401:  # Gói tin từ request
-                    sys.stdout.write("\r{} {} \n".format('401 : Chưa đến lượt'))
                     client.close()
 
                 case 500:  # Gói tin đóng kết nối
@@ -167,7 +178,6 @@ def write():
         if state.can_choose is True and user_input.strip().isdigit() and int(user_input) in range(1, bingo.size()+1):
             state.can_choose = False
             bingo.update_and_print(int(user_input))
-            print('history', bingo.history)
             message = "Nhập số nguyên: \n"
             ReceivedThread = False
             client.send(protocol._select_number(int(user_input)))
@@ -183,13 +193,3 @@ if __name__ == '__main__':
     # start write thread
     receive_thread = threading.Thread(target=write)
     receive_thread.start()
-
-    # while True:
-
-    #     data = client.recv(1024)
-
-    #     str = input('Enter a number: ')
-    #     print('You entered', str)
-    #     print('echo: ', data.decode())
-
-    #     client.send(str.encode())

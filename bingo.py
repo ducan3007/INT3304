@@ -88,7 +88,6 @@ class Bingo:
         return False
 
     def printBoard(self):
-        print("BINGO: ")
         output = ''
         for i in range(self.x):
             for j in range(self.x):
@@ -121,7 +120,6 @@ class Bingo:
         return data_type.encode() + protocol._int_to_bytes(shape[0]) + protocol._int_to_bytes(len(bytes)) + bytes
 
     def size(self):
-        print('size: ', self.x)
         return self.x**2
 
     def update_and_print(self, num):
