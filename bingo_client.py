@@ -8,7 +8,7 @@ from bingo import Bingo
 import sys
 import json
 
-HOST = 'localhost'
+HOST = 'localhost'  # Hoặc IP của máy
 PORT = 27003
 SECRET_KEY = '12345678'
 
@@ -116,6 +116,13 @@ def receive():
 
                 case 999:
                     sys.stdout.write("\r{} \n".format(f'{green(999)} : Bạn thắng !.'))
+
+                case 1000:
+                    state.won = True
+                    ReceivedThread = True
+                    sys.stdout.write("\r{} \n".format(f'{green(1000)} : Đối thủ thoát Bạn thắng !.'))
+                    client.close()
+                    sys.exit()
 
                 case 888:
                     sys.stdout.write("\r{} \n".format(f'{green(999)} : Hòa.'))

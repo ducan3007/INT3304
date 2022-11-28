@@ -7,50 +7,43 @@ import protocol
 from bingo import Bingo
 from enum import Enum
 from struct import *
+import redis
 import random
 import string
 import json
 
-hostname = socket.gethostname()
+
+# hostname = socket.gethostname()
+
+# hostname = socket.gethostname()
+# HOST = socket.gethostbyname(hostname)
 
 HOST = 'localhost'
 PORT = 27003
 KEY = 'flag{1234567890}'
 
-LEVEL = 3 # 3x3
+LEVEL = 5  # 3x3
 
+redisClient = redis.Redis(host='localhost', port=6379, db=0, password="admin")
 
-class PKT(Enum):
-    HELLO = 0
-    PLAY = 4
-    UPDATE = 5
-    CREATEMAP = 2
-    NOTICE = 3
-    RESULT = 6
-    START = 1
-    END = 7
-
-
-# Biến Global Dùng để lưu thông tin game của các room
-
-
-# Để ý hai cái này
-# Biến Globlal Dùng để lưu các cặp (socket_client 1,socket_client 2) theo room
-#
 # Clients = {id1: socket_client1, id2: socket_client2}}
 Clients = dict()
 
-# Biến Global Dùng để lưu các bàn chơi theo room
 # Bingos = {room_id: {uuid1: Bingo, uuid2: Bingo}}
 Bingos = dict()
 
 # Biến Global Dùng để lưu lượt đi tiếp theo
 NextMove = dict()
 
+
+# For Redis
+
+RoomList = dict()
+
+
 # Khởi tạo mặc định 5 phòng có room_id từ 1 đến 5
 for i in range(5):
     Bingos[f'{i}'] = dict()
-
 
 # Chưa cần dùng đến
 MessageQueue = dict()
@@ -182,6 +175,7 @@ class ClientThread(threading.Thread):
                         else:
                             print('Continue')
                             NextMove[self.room_id] = ooponent_id
+                            self.server_state()
                             Clients[ooponent_id].send(protocol.can_move())
 
                     case 204:
@@ -289,26 +283,52 @@ class ClientThread(threading.Thread):
         # đóng kết nối, xóa Bingo
         del Bingos[self.room_id][self.uuid]
         del Clients[self.uuid]
-
+        
         # gửi thông báo Chiến thắng cho đối thủ
         opponent_id = self.get_opponent_id()
 
         if (opponent_id is not None):
             print('999: ', opponent_id)
-            Clients[opponent_id].send(protocol.you_won())
+            Clients[opponent_id].send(protocol.you_won_enemy_out())
 
         # Kiểm tra state
         self.server_state()
 
     def server_state(self):
         print('----------------- SERVER STATE -----------------')
-        for Room in Bingos:
-            for uuid in Bingos[Room]:
-                print(f'Room {Room}, {uuid} : \n {Bingos[Room][uuid].game_board}')
+        # for Room in Bingos:
+        #     for uuid in Bingos[Room]:
+        #         print(f'Room {Room}, {uuid} : \n {Bingos[Room][uuid].history}')
 
-        for uuid in Clients:
-            print(f'Client {uuid} : {Clients[uuid]}')
+        # for a in NextMove:
+        #     print(f'Next move {a} : {NextMove[a]}')
+
+        print("NextMove: ", NextMove)
+        print(Bingos)
+        self.redis_game_state()
         print('-----------------------------------------------')
+
+    def redis_game_state(self):
+        redis_data = dict()
+
+        # for Room in Bingos:
+        #     for uuid in Bingos[Room]:
+        #         print(f'Room {Room}, {uuid} : \n {Bingos[Room][uuid].history}')
+
+        for room in Bingos:
+            print('ROOM: ', room)
+            redis_data[room] = dict()
+            redis_data[room]['players'] = []
+            redis_data[room]['next_move'] = ''
+
+            for uuid in Bingos[room]:
+                redis_data[room]['players'].append(uuid)
+                if (len(Bingos[room]) == 2):
+                    redis_data[room]['next_move'] = NextMove[room]
+
+        redisClient.set('game_state', json.dumps(redis_data))
+
+        print("redis_data:", redis_data)
 
 
 def create_uuid():
