@@ -137,12 +137,8 @@ class Bingo:
         self.update(pos[0], pos[1], int(num))
         self.printBoard()
 
-    def to_json(self, uid):
-        gameBoard = json.dumps(self.game_board, cls=NumpyArrayEncoder)
-        gameHistory = json.dumps(self.history)
-
+    def to_json(self):
         return {
-            "id": uid,
             "board": self.serialize_matrix(),
             "history": json.dumps(self.history),
         }

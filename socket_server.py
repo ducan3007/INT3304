@@ -1,16 +1,16 @@
+import json
+import string
+import random
+import redis
+from struct import *
+from enum import Enum
+from bingo import Bingo
+import protocol
+from random import randint
 import threading
 import socket
-from time import sleep
+import time
 # from render import Render
-from random import randint
-import protocol
-from bingo import Bingo
-from enum import Enum
-from struct import *
-import redis
-import random
-import string
-import json
 
 
 # hostname = socket.gethostname()
@@ -62,7 +62,7 @@ class ClientThread(threading.Thread):
 
         # Mình lưu id vào thread này, id này Client ko biết được
         self.data = None
-        self.room_id = None
+        self.room_id = ''
         self.uuid = create_uuid()
 
         try:
@@ -131,11 +131,15 @@ class ClientThread(threading.Thread):
                             Clients[self.uuid].send(protocol.invalid_move())
                             continue
 
-                        # Bắt đầu cập nhật dữ liệu hai mt ở Server
+                        # Bắt đầu cập nhật dữ liệu hai người chơi ở Server
                         pos_1 = self.getBingo().pos(int(n))
                         pos_2 = self.getOpponentBingo().pos(int(n))
                         self.getBingo().update(pos_1[0], pos_1[1], int(n))
                         self.getOpponentBingo().update(pos_2[0], pos_2[1], int(n))
+
+                        # Lưu cả người chơi vào Redis
+                        self.redis_save_bingos(self.uuid)
+                        self.redis_save_bingos(ooponent_id)
 
                         # 888 : Nếu cả hai thắng thì gửi thông báo hòa, gửi kết qủa cho hai người chơi
                         if self.getBingo().isWin() and self.getOpponentBingo().isWin():
@@ -199,7 +203,7 @@ class ClientThread(threading.Thread):
     def getOpponentBingo(self):
         return Bingos[self.room_id][self.get_opponent_id()]
 
-    # Gửi kết quả ma trận cho cả hai
+    # Gửi kết quả ma trận cho cả hai khi vấn đấu kết thúc
     def sent_result_matrix_to_all(self):
         print("SEND TO ALLL")
         opponent_history = json.dumps(self.getOpponentBingo().history)
@@ -229,10 +233,11 @@ class ClientThread(threading.Thread):
 
             if len(Bingos[Room]) == 1:
 
-                # Tạo bàn chơi mới
+                # Tạo bàn chơi mới và lưu Game_Board và History vào Redis
                 self.bingo = Bingo(LEVEL)
+                self.redis_save_bingos(self.uuid)
 
-                # ánh xạ uuid của client vào Bingo
+                # Ánh xạ uuid của client vào Bingo
                 Bingos[Room][self.uuid] = self.bingo
                 self.room_id = Room
                 NextMove[self.room_id] = self.uuid
@@ -246,8 +251,10 @@ class ClientThread(threading.Thread):
 
             if len(Bingos[Room]) == 0:
 
-                # Tao bàn chơi mới và luu vào dict Bingos
+                # Tao bàn chơi mới và luu vào dict Bingos, Lưu vào Redis
                 self.bingo = Bingo(LEVEL)
+                self.redis_save_bingos(self.uuid)
+
                 self.room_id = Room
                 Bingos[Room][self.uuid] = self.bingo
                 print('Joined Room', Bingos[Room])
@@ -255,35 +262,34 @@ class ClientThread(threading.Thread):
 
         return False
 
-    def boardcast(self):
-        for uuid in Clients:
-            if uuid != self.uuid:
-                Clients[uuid].send(protocol._server_boardcast(f'Client {self.uuid} has joined the server'.encode()))
-
-    # lấy id của đối thủ trong phòng để boardcast
-    def get_opponent_id(self):
+    # Lấy id của đối thủ trong phòng để boardcast
+    def get_opponent_id(self) -> str:
         if (self.room_id is not None):
             for uuid in Bingos[self.room_id]:
                 if uuid != self.uuid:
                     return uuid
-        return None
+        return
 
-    # chấp nhận kết nối
     def accept_connection(self):
         self.conn.send(protocol.accept_connection(self.uuid))
 
-    # từ chối kết nối
     def reject_connection(self):
         self.conn.send(int.to_bytes(400, 4, 'little'))
 
-    # dọng dẹp sau khi người dùng hủy kết nối
+    # Dọn dẹp sau khi người dùng hủy kết nối
     def clean_up_function(self):
+        self.redis_save_game_history()
         print("clean up function")
 
         # đóng kết nối, xóa Bingo
         del Bingos[self.room_id][self.uuid]
         del Clients[self.uuid]
-        
+
+        redisClient.delete(f'game_board:{self.uuid}')
+        redisClient.delete(f'history:{self.uuid}')
+
+        # Lưu lịch sử của games
+
         # gửi thông báo Chiến thắng cho đối thủ
         opponent_id = self.get_opponent_id()
 
@@ -291,30 +297,21 @@ class ClientThread(threading.Thread):
             print('999: ', opponent_id)
             Clients[opponent_id].send(protocol.you_won_enemy_out())
 
-        # Kiểm tra state
         self.server_state()
 
     def server_state(self):
         print('----------------- SERVER STATE -----------------')
-        # for Room in Bingos:
-        #     for uuid in Bingos[Room]:
-        #         print(f'Room {Room}, {uuid} : \n {Bingos[Room][uuid].history}')
-
-        # for a in NextMove:
-        #     print(f'Next move {a} : {NextMove[a]}')
-
         print("NextMove: ", NextMove)
         print(Bingos)
-        self.redis_game_state()
+        self.redis_save_game_state()
         print('-----------------------------------------------')
 
-    def redis_game_state(self):
+    '''
+    Lưu vào REDIS   
+    '''
+
+    def redis_save_game_state(self):
         redis_data = dict()
-
-        # for Room in Bingos:
-        #     for uuid in Bingos[Room]:
-        #         print(f'Room {Room}, {uuid} : \n {Bingos[Room][uuid].history}')
-
         for room in Bingos:
             print('ROOM: ', room)
             redis_data[room] = dict()
@@ -329,6 +326,46 @@ class ClientThread(threading.Thread):
         redisClient.set('game_state', json.dumps(redis_data))
 
         print("redis_data:", redis_data)
+
+    def redis_save_bingos(self, ID):
+        redisClient.set(f'game_board:{ID}', self.bingo.to_json()['board'])
+        redisClient.set(f'history:{ID}', self.bingo.to_json()['history'])
+
+    def redis_save_game_history(self):
+        # Lưu vào Redis [ match_id + room_id + 2 uid + 2 game_board + 2 history ]
+        if (len(Bingos[self.room_id]) != 2):
+            return
+
+        math_id = create_uuid().encode()
+        math_id_len = protocol._int_to_bytes(len(math_id))
+
+        room_id = self.room_id.encode()
+        room_id_len = protocol._int_to_bytes(len(room_id))
+
+        uid_1 = self.uuid.encode()
+        uid_1_len = protocol._int_to_bytes(len(uid_1))
+
+        uid_2 = self.get_opponent_id().encode()
+        uid_2_len = protocol._int_to_bytes(len(uid_2))
+
+        game_board_1 = self.bingo.serialize_matrix()
+        game_board_1_len = protocol._int_to_bytes(len(game_board_1))
+
+        game_board_2 = self.getOpponentBingo().serialize_matrix()
+        game_board_2_len = protocol._int_to_bytes(len(game_board_2))
+
+        history_1 = json.dumps(self.bingo.history).encode()
+        history_1_len = protocol._int_to_bytes(len(history_1))
+
+        hsitory_2 = json.dumps(self.getOpponentBingo().history).encode()
+        history_2_len = protocol._int_to_bytes(len(hsitory_2))
+
+        data = math_id_len + math_id + room_id_len + room_id + uid_1_len + uid_1 + uid_2_len + uid_2 + game_board_1_len + \
+            game_board_1 + game_board_2_len + game_board_2 + history_1_len + history_1 + history_2_len + hsitory_2
+
+        timeMilisc = round(time.time()*1000)
+
+        redisClient.zadd('game_history', {data: timeMilisc})
 
 
 def create_uuid():

@@ -1,5 +1,6 @@
 import numpy as np
 from enum import Enum
+import json
 ''''
 protocol.py: File này định nghĩa các hàm để đóng gói package
 
@@ -93,6 +94,7 @@ def accept_connection(uuid):
 def you_won():
     return int.to_bytes(999, 4, 'little')
 
+
 def you_won_enemy_out():
     return int.to_bytes(1000, 4, 'little')
 
@@ -141,3 +143,63 @@ def _select_number(number):
 
 def get_next_move():
     return int.to_bytes(204, 4, 'little')
+
+# Decode binary history lấy từ Redis [ match_id + room_id + 2 uid + 2 game_board + 2 history ]
+def redis_decode_history(package):
+    match_id_len = _get_ints(package[0:4])
+    match_id = _get_str(package[4:4+match_id_len])
+
+    room_id_len = _get_ints(package[4+match_id_len:8+match_id_len])
+    room_id = _get_str(package[8+match_id_len:8+match_id_len+room_id_len])
+
+    uid_1_len = _get_ints(package[8+match_id_len+room_id_len:12+match_id_len+room_id_len])
+    uid_1 = _get_str(package[12+match_id_len+room_id_len:12+match_id_len+room_id_len+uid_1_len])
+
+    uid_2_len = _get_ints(package[12+match_id_len+room_id_len+uid_1_len:16+match_id_len+room_id_len+uid_1_len])
+    uid_2 = _get_str(package[16+match_id_len+room_id_len+uid_1_len:16+match_id_len+room_id_len+uid_1_len+uid_2_len])
+
+    game_board_1_len = _get_ints(
+        package[16+match_id_len+room_id_len+uid_1_len+uid_2_len:20+match_id_len+room_id_len+uid_1_len+uid_2_len])
+    game_board_1 = deserialize_matrix(
+        package
+        [20 + match_id_len + room_id_len + uid_1_len + uid_2_len: 20 + match_id_len +
+         room_id_len + uid_1_len + uid_2_len + game_board_1_len])
+
+    game_board_2_len = _get_ints(
+        package
+        [20 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len: 24 +
+         match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len])
+    game_board_2 = deserialize_matrix(
+        package
+        [24 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len: 24 +
+         match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len +
+         game_board_2_len])
+
+    history_1_len = _get_ints(
+        package
+        [24 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len + game_board_2_len: 28 + match_id_len +
+         room_id_len + uid_1_len + uid_2_len + game_board_1_len + game_board_2_len])
+    history_1 = json.loads(
+        package
+        [28 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len + game_board_2_len: 28 + match_id_len +
+         room_id_len + uid_1_len + uid_2_len + game_board_1_len + game_board_2_len + history_1_len].decode())
+
+    history_2_len = _get_ints(
+        package
+        [28 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len + game_board_2_len +
+         history_1_len: 32 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len +
+         game_board_2_len + history_1_len])
+    history_2 = json.loads(
+        package
+        [32 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len + game_board_2_len +
+         history_1_len: 32 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len +
+         game_board_2_len + history_1_len + history_2_len].decode())
+
+    print("match_id: ", match_id)
+    print("room_id: ", room_id)
+    print("uid_1: ", uid_1)
+    print("uid_2: ", uid_2)
+    print("game_board_1: ", game_board_1)
+    print("game_board_2: ", game_board_2)
+    print("history_1: ", history_1)
+    print("history_2: ", history_2)

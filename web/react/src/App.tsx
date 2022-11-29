@@ -58,8 +58,8 @@ function App() {
       </a>
       {/* <Login /> */}
 
-      <Room />
-      <RoomList />
+      {/* <Room />
+      <RoomList /> */}
     </div>
   );
 }
