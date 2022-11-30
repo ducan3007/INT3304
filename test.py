@@ -11,8 +11,20 @@ if __name__ == '__main__':
 
     get_history = redisClient.zrange("game_history", 0, -1, desc=True, withscores=True)
 
+    print('history from redis: ', type(get_history))
+
+    histories = []
+    for i in range(len(get_history)):
+        temp = {
+            'time': get_history[i][1],
+            'data': protocol.redis_decode_history(get_history[i][0])
+        }
+        histories.append(temp)
+
+    print('history from redis: ', histories)
+
     # Sau khi chơi xong, gọi thằng này để Lịch sử chơi
-    protocol.redis_decode_history(get_history[0][0])
+    # protocol.redis_decode_history(get_history)
 
     # bingo = Bingo(5)
     # a = bingo.to_json()

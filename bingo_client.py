@@ -72,6 +72,9 @@ def receive():
                 case 201:  # Server trả về Gói tin bắt đầu game
                     bingo.x = protocol.deserialize_matrix(message[4:])[0]
                     bingo.game_board = protocol.deserialize_matrix(message[4:])[1]
+                
+                
+                    # Them UI vao day
                     bingo.printBoard()
                     sys.stdout.write("\r{} {} \n".format("(Won, Can choose):", state.won, state.can_choose))
 

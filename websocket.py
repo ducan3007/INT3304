@@ -6,16 +6,15 @@ import json
 import websockets
 import asyncio
 import time
+import protocol
 from datetime import datetime
 import redis
 
 
 redisClient = redis.Redis(host='localhost', port=6379, db=0, password="admin")
+
 t = time.localtime()
 current_time = time.strftime("%H:%M:%S", t)
-
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 
 def log(*args, **kwargs):
@@ -24,16 +23,30 @@ def log(*args, **kwargs):
 
 async def main(ws, path):
     # ping pong
+
     while True:
-        msg = await ws.recv()
+        recv = await ws.recv()
+        print('recv: ', recv)
+        message = json.loads(recv)
 
-        if msg == 'ping':
-            ganme_state = redisClient.get('game_state')
-            data = json.loads(ganme_state)
+        if message['msg'] == 'ping':
+            log('ping')
+            game_state = json.loads(redisClient.get('game_state').decode())
+            game_history = protocol.redis_get_history(redisClient.zrange(
+                "game_history", 0, -1, desc=True, withscores=True))
+            data = json.dumps({'msg': 'get', 'game_state': game_state, 'game_history': game_history})
+            await ws.send(data)
 
-            print('data', data)
-
-            await ws.send(json.dumps(data))
+        if message['msg'] == 'detail':
+            pass
+            # room_id = message['room_id']
+            # game_state = json.loads(redisClient.get('game_state').decode())
+            # print(game_state)
+            # for i in game_state:
+            #     if i['room_id'] == room_id:
+            #         data = json.dumps({'msg': 'detail', 'game_state': i})
+            #         await ws.send(data)
+            #         break
 
 
 if __name__ == '__main__':
