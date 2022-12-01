@@ -17,7 +17,7 @@ Render bảng -> Bắt nhập số hàng cột -> Bảng -> Chọn số -> Valid
 * quá trình tạo 1 match để 2 client join vào gồm:
 ### b1. Gửi thông tin GAME cho bên web
 
-`S` sẽ gửi thông tin game cho `A` bao gồm 4 trường theo thứ tự sao[
+`S` sẽ gửi thông tin game cho `A` bao gồm 4 trường theo thứ tự sau [
 ![image](https://user-images.githubusercontent.com/91183884/205115739-c00ea714-9069-4aa5-8797-66276fb26203.png)
 + Tên game: (không được trùng với tên game người khác đã đăng ký),
 + IP: ip để bên web xác minh và gửi nhận thông tin với game server(nếu làm server bằng websocket thì gửi ip theo dạng ws://ip để phân biệt được là socket thuần hay
