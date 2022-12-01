@@ -24,23 +24,24 @@ Render bảng -> Bắt nhập số hàng cột -> Bảng -> Chọn số -> Valid
 websocket), 
 + Port: port của game server để bên web kết nối, 
 + Rule: có thể là file ảnh hay text để người chơi có thể hiểu rõ cách chơi game
-![image](https://user-images.githubusercontent.com/91183884/205116009-198840c4-e13d-4d38-b099-db376230156d.png)]
+![image](https://user-images.githubusercontent.com/91183884/205116009-198840c4-e13d-4d38-b099-db376230156d.png)
 
 ### b2. Tạo 1 Match
 
 Sau khi có thông tin của 1 game, bước tiếp theo sẽ tạo 1 Match với các thông tin sau(chỉ những game status = On mới tạo được ván đấu).
 ![image](https://user-images.githubusercontent.com/91183884/205118668-e66985db-a1cd-490f-a7b5-a65ab5690e52.png)
- Chọn Create Game[
+ Chọn Create Game
+ 
  ![image](https://user-images.githubusercontent.com/91183884/205118948-d4d4e2a0-a942-4ea8-a209-447097d6e9d4.png)
 + ID1,ID2: là 2 ID của 2 người chơi, bắt buộc phải nhập đúng và ID1 không trùng ID2
-+ Pasword:là mật khẩu thống nhất để người chơi nhập vào Server Game]
++ Pasword:là mật khẩu thống nhất để người chơi nhập vào Server Game
 
 ### II. Phía socket
 
 1. Sau khi tạo 1 trận đấu thành công, bên `A` sẽ gửi tới địa chỉ IP, Port của game đã đăng kí cho `S` theo format
 ![image](https://user-images.githubusercontent.com/91183884/205120943-d6c275d9-c4c5-44b1-a219-9493f8847a2e.png)
 
-2. Nếu thành công, `S` phản hồi cho `A`: [
+2. Nếu thành công, `S` phản hồi cho `A`:[
 {"result": 1, "ip": "localhost", "port": 27003, "path": "path"}
 + result = 1 là thành công, 
 + ip,port: ip này là thông tin match đã tạo,
