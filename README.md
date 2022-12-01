@@ -8,72 +8,67 @@ $ py -m venv .venv
 ```
 
 Render bảng -> Bắt nhập số hàng cột -> Bảng -> Chọn số -> Validate số, lấy vị trí số trong bảng,số bị chọn hiện thị với màu khác -> Render
+ [ 
++ Web server game là A (SV cơ),
++ Game server là S (Sv của mình), 
++ 2 User là C1, C2]
 
-### I. Thiết lập 1 match
-+ Web server game là `A` (SV cơ)
-+ Game server là `S` (Sv của mình)
-+ 2 User là `C1`, `C2` (Client của mình, chưa có)
+### I. Phía Frontend
+* quá trình tạo 1 match để 2 client join vào gồm:
+### b1. Gửi thông tin GAME cho bên web
 
-* quá trình có 1 match để 2 client join vào gồm:
-### b1. 
+`S` sẽ gửi thông tin game cho `A` bao gồm 4 trường theo thứ tự sao[
+![image](https://user-images.githubusercontent.com/91183884/205115739-c00ea714-9069-4aa5-8797-66276fb26203.png)
++ Tên game: (không được trùng với tên game người khác đã đăng ký),
++ IP: ip để bên web xác minh và gửi nhận thông tin với game server(nếu làm server bằng websocket thì gửi ip theo dạng ws://ip để phân biệt được là socket thuần hay
+websocket), 
++ Port: port của game server để bên web kết nối, 
++ Rule: có thể là file ảnh hay text để người chơi có thể hiểu rõ cách chơi game
+![image](https://user-images.githubusercontent.com/91183884/205116009-198840c4-e13d-4d38-b099-db376230156d.png)]
 
-`A` phải có thông tin của `S` để `C1`, `C2` yêu cầu tạo 1 match của game nào. 
-	`S` sẽ gửi cho `A` (ip, port cung cấp sau) gồm những thông tin  theo thứ tự[
+### b2. Tạo 1 Match
 
-+ action (int 4byte, với cung cấp thông tin của game thì action=1),
-+ a (int 4 byte, độ dài của ip game), 
-+ ip/domain game(string), 
-+ b (int 4byte, thông tin của port), 
-+ c (int 4 byte, độ dài tên game), 
-+ tên game (string), 
-+ d (int, độ dài thông tin game như rule), 
-+ rule,
-+ e (int 4 byte, độ dài author), 
-+ author (string)
-]
-	`A` nhận thông tin từ `S`: 
-+ nếu chấp nhận thì gửi [1(int 4 byte)], 
-+ còn không nhận thì [0(int 4 byte), error(thông tin lỗi)]
+Sau khi có thông tin của 1 game, bước tiếp theo sẽ tạo 1 Match với các thông tin sau(chỉ những game status = On mới tạo được ván đấu).
+![image](https://user-images.githubusercontent.com/91183884/205118668-e66985db-a1cd-490f-a7b5-a65ab5690e52.png)
+ Chọn Create Game[
+ ![image](https://user-images.githubusercontent.com/91183884/205118948-d4d4e2a0-a942-4ea8-a209-447097d6e9d4.png)
++ ID1,ID2: là 2 ID của 2 người chơi, bắt buộc phải nhập đúng và ID1 không trùng ID2
++ Pasword:là mật khẩu thống nhất để người chơi nhập vào Server Game]
 
-### b2. 
-sau khi `A` có thông tin của 1 game `S`. bước tiếp theo là 2 User cần có 1 match và thông tin của match đó để chơi. 
-	`A` sẽ gửi yêu cầu `S` bắt đầu 1 trận đấu với thông tin.[
-+ action(int 4byte, tạo match thì action =1),
-+ matchId(int 4 byte),
-+ uid1(int 4 byte), 
-+ uid2(int 4 byte), 
-+ x(int 4 byte độ dài của keymatch), 
-+ keymatch(string)]
+### II. Phía socket
 
-`S` nhận thông tin từ `A`: nếu tạo thành công `S` gửi cho `A`: [
-+ 1(int 4 byte)], 
-+ nếu không thành công gửi cho `A`[0(int 4 byte), error(string, thông tin lỗi)]
+1. Sau khi tạo 1 trận đấu thành công, bên `A` sẽ gửi tới địa chỉ IP, Port của game đã đăng kí cho `S` theo format
+![image](https://user-images.githubusercontent.com/91183884/205120943-d6c275d9-c4c5-44b1-a219-9493f8847a2e.png)
 
-### b3. 
-Khi `A` nhận thông tin từ `S` là 1 thì `A` gửi thông tin `ip, port, keymatch cho 2 User`.
+2. Nếu thành công, `S` phản hồi cho `A`: [
+{"result": 1, "ip": "localhost", "port": 27003, "path": "path"}
++ result = 1 là thành công, 
++ ip,port: ip này là thông tin match đã tạo,
++ path: đối với game web thì cần thêm thông tin path để tạo thành url, ]
 
+3. Nếu thất bại thì `S` sẽ gửi cho `A` result = 0.
 
-### b4. 
-User truy cập vào `ip, port` của `S` do `A` cung cấp. 
-Sau đó User nhập thông tin `uid` và `keymatch` của mình cho `S` để chơi game.
-( Khi nhập uid thì `S` phải phân biệt kết nối nào là của user nào tiện cho việc tính điểm và trả lại kết quả)
+### III. Cập nhập thông tin trận đấu
+1. sau khi 2 người chơi đã vào ván và đấu bắt đầu chơi game thì `S` sẽ gửi cho `A`: [
++ result = 1,
++ match: giá trị mà `A` gửi cho `S`]
 
-// bổ sung: lúc 2 user bắt đầu chơi S gửi cho A [action=3,mathId;status=1]
+2. sau khi 2 người chơi đã chơi xong và kết thúc ván đấu, `S` sẽ gửi cho `A`: [
++ result = 3, 
++ match]
 
-### b5. 
-Sau khi chơi xong `S` gửi lại thông tin cho `A`. [ 
-+ action=2(trả thông tin kết quả, kết thúc ván đấu),
-+ matchId(int 4byte), 
-+ score1(int 4 byte của uid1), 
-+ score2(int 4 byte của uid2)] 
+3.`A` sẽ gửi cho `S` yêu cầu thông tin ván đấu:[
++ result = 2,
++ match]
 
-### II. Cập nhật thông tin trạng thái 1 match đang chơi.
+4. Thông tin mà `S` sẽ gửi cho `A` bao gồm:[
++ result = 2,
++ match,
++ status: trạng thái ván đấu, với 0 là chưa bắt đầu, 1 đang diễn ra, 3 là đã kết thúc,
++ id1: điểm của id1,
++ id2: điểm của id2,
+(VD: {"result": 2, "match": 10, "status": 1, "id1": 5, "id2": 7})]
 
-1. bên `A` gửi gói tin cho `S`  [action(int 4 byte , =3 với việc cập nhật thông tin), matchId(int 4 byte)].
-
-2. `S` phản hồi cho `A`: [
-+ action(int 4 byte, =3 ), 
-+ status(0,1,2 tương ứng vs chưa bắt đầu, đang diễn ra, kết thúc), 
-+ [score1(int4 byte, điểm uid1), 
-+ score(int 4 byte, điểm uid2) chỉ cần gửi với status =1 hoặc 2]]
-
+5. Nếu như gặp phải bất kì lỗi gì thì `S` sẽ gửi cho `A`:[
++ result = 0,
++ match]
