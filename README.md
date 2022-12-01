@@ -29,10 +29,10 @@ websocket),
 
 ### b2. Tạo 1 Match
 
-Sau khi có thông tin của 1 game, bước tiếp theo sẽ tạo 1 Match với các thông tin sau(chỉ những game status = On mới tạo được ván đấu).
+* Sau khi có thông tin của 1 game, bước tiếp theo sẽ tạo 1 Match với các thông tin sau(chỉ những game status = On mới tạo được ván đấu).
 ![image](https://user-images.githubusercontent.com/91183884/205118668-e66985db-a1cd-490f-a7b5-a65ab5690e52.png)
- Chọn Create Game
- 
+
+ * Chọn Create Game
  ![image](https://user-images.githubusercontent.com/91183884/205118948-d4d4e2a0-a942-4ea8-a209-447097d6e9d4.png)
 + ID1,ID2: là 2 ID của 2 người chơi, bắt buộc phải nhập đúng và ID1 không trùng ID2
 + Pasword:là mật khẩu thống nhất để người chơi nhập vào Server Game
