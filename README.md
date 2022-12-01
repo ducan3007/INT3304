@@ -44,8 +44,10 @@ websocket),
 ![image](https://user-images.githubusercontent.com/91183884/205120943-d6c275d9-c4c5-44b1-a219-9493f8847a2e.png)
 
 2. Nếu thành công, `S` phản hồi cho `A`:
+
 {"result": 1, "ip": "localhost", "port": 27003, "path": "path"}
-[+ result = 1 là thành công, 
+[
++ result = 1 là thành công, 
 + ip,port: ip này là thông tin match đã tạo,
 + path: đối với game web thì cần thêm thông tin path để tạo thành url,]
 
