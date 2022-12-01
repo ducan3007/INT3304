@@ -70,6 +70,7 @@ websocket),
 + status: trạng thái ván đấu, với 0 là chưa bắt đầu, 1 đang diễn ra, 3 là đã kết thúc,
 + id1: điểm của id1,
 + id2: điểm của id2,]
+
 (VD: {"result": 2, "match": 10, "status": 1, "id1": 5, "id2": 7})
 
 5. Nếu như gặp phải bất kì lỗi gì thì `S` sẽ gửi cho `A`:[
