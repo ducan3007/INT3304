@@ -48,7 +48,7 @@ websocket),
 {"result": 1, "ip": "localhost", "port": 27003, "path": "path"}
 [
 + result = 1 là thành công, 
-+ ip,port: ip này là thông tin match đã tạo,
++ ip,port: là thông tin match đã tạo,
 + path: đối với game web thì cần thêm thông tin path để tạo thành url,]
 
 3. Nếu thất bại thì `S` sẽ gửi cho `A` result = 0.
