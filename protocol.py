@@ -49,6 +49,7 @@ def _get_type(data):
 
 
 def deserialize_matrix(package):
+
     data_type = _get_str(package[0:5])
     shape = _get_ints(package[5:9])
     len_ = _get_ints(package[9:13])
@@ -197,6 +198,17 @@ def redis_decode_history(package):
          history_1_len: 32 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len +
          game_board_2_len + history_1_len + history_2_len].decode())
 
+    winner_len = _get_ints(
+        package
+        [32 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len + game_board_2_len +
+         history_1_len + history_2_len: 36 + match_id_len + room_id_len + uid_1_len + uid_2_len +
+         game_board_1_len + game_board_2_len + history_1_len + history_2_len])
+    winner = _get_str(
+        package
+        [36 + match_id_len + room_id_len + uid_1_len + uid_2_len + game_board_1_len + game_board_2_len +
+         history_1_len + history_2_len: 36 + match_id_len + room_id_len + uid_1_len + uid_2_len +
+         game_board_1_len + game_board_2_len + history_1_len + history_2_len + winner_len])
+
     # print("match_id: ", match_id)
     # print("room_id: ", room_id)
     # print("uid_1: ", uid_1)
@@ -214,7 +226,8 @@ def redis_decode_history(package):
         "game_board_1": game_board_1[1].tolist(),
         "game_board_2": game_board_2[1].tolist(),
         "history_1": history_1,
-        "history_2": history_2
+        "history_2": history_2,
+        "winner": winner
     }
 
 

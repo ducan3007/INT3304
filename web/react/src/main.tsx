@@ -5,15 +5,20 @@ import Room from './Room';
 import './index.css';
 
 import { createBrowserRouter, RouterProvider, Route } from 'react-router-dom';
+import History from './History';
 
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: <App />
+    path: '/game/history',
+    element: <History />
   },
   {
     path: '/:id',
     element: <Room />
+  },
+  {
+    path: '/',
+    element: <App />
   }
 ]);
 

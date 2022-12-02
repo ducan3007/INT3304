@@ -38,15 +38,56 @@ async def main(ws, path):
             await ws.send(data)
 
         if message['msg'] == 'detail':
-            pass
-            # room_id = message['room_id']
-            # game_state = json.loads(redisClient.get('game_state').decode())
-            # print(game_state)
-            # for i in game_state:
-            #     if i['room_id'] == room_id:
-            #         data = json.dumps({'msg': 'detail', 'game_state': i})
-            #         await ws.send(data)
-            #         break
+            room_id = message.get('room_id')
+            data = redisClient.get('game_state')
+
+            if room_id is None:
+                await ws.send(json.dumps({'msg': 'error', 'error': 'room_id is None'}))
+                continue
+
+            if data is not None:
+                game_state = json.loads(data.decode())
+                print('game_state: ', game_state)
+
+                res = []
+                players = []
+
+                for i in game_state:
+                    if i == room_id:
+                        players = game_state[room_id]['players']
+                        break
+
+                print(players)
+
+                id_player_1 = players[0] if len(players) > 0 else ''
+                id_player_2 = players[1] if len(players) > 1 else ''
+
+                player_1 = redisClient.get('game_board:' + id_player_1)
+                player_2 = redisClient.get('game_board:' + id_player_2)
+
+                player_1_history = redisClient.get('history:' + id_player_1)
+                player_2_history = redisClient.get('history:' + id_player_2)
+
+                if player_1_history is not None:
+                    player_1_history = json.loads(player_1_history.decode())
+
+                if player_2_history is not None:
+                    player_2_history = json.loads(player_2_history.decode())
+
+                if player_1 is not None:
+                    res.append({'uid': id_player_1, 'board': protocol.deserialize_matrix(
+                        player_1)[1].tolist(), 'history': player_1_history or {}})
+                else:
+                    res.append({'uid': id_player_1, 'board': [], 'history': player_1_history or {}})
+
+                if player_2 is not None:
+                    res.append({'uid': id_player_2, 'board': protocol.deserialize_matrix(
+                        player_2)[1].tolist(), 'history': player_2_history or {}})
+                else:
+                    res.append({'uid': id_player_2, 'board': [], 'history': player_2_history or {}})
+
+                data = json.dumps({'msg': 'get', 'res': res, 'next_move': game_state[room_id]['next_move']})
+                await ws.send(data)
 
 
 if __name__ == '__main__':

@@ -7,11 +7,12 @@ type RoomProps = {
   game_state: any;
 };
 
+export let webSocket = new WebSocket('ws://localhost:8081');
+
 const Room = (props: any) => {
   const { id } = useParams();
-  const webSocket = useRef<WebSocket>(new WebSocket(URL));
 
-  const [message, setMessage] = useState<string>('');
+  const [data, setData] = useState<any>([]);
   const [messages, setMessages] = useState<string[]>([]);
   const [connected, setConnected] = useState<boolean>(false);
 
@@ -25,40 +26,39 @@ const Room = (props: any) => {
 
   // console.log(players);
 
+  console.log(id);
+
   useEffect(() => {
     // Handle ping pong interval every 2 seconds
     let pingPongInterval: any;
 
-    if (webSocket.current.readyState !== WebSocket.CLOSED) {
+    if (webSocket.readyState !== WebSocket.CLOSED) {
       pingPongInterval = setInterval(() => {
-        console.log(new Date().toLocaleTimeString(), 'detail');
-        webSocket.current.send(JSON.stringify({ msg: 'detail', room_id: id }));
+        console.log(new Date().toLocaleTimeString(), 'ping');
+
+        webSocket.send(JSON.stringify({ msg: 'detail', room_id: id }));
       }, 1000);
 
-      webSocket.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
+      webSocket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
 
-        switch (data?.msg) {
-          case 'pong':
-            console.log(new Date().toLocaleTimeString(), 'pong', event.data);
-          case 'get':
-            console.log(new Date().toLocaleTimeString(), 'get', data);
-          case 'detail':
-            console.log(new Date().toLocaleTimeString(), 'detail', data);
-        }
+        setData({
+          boards: message?.res,
+          next_move: message?.next_move
+        });
       };
     }
 
     // Handle close and Reconnect every 2 seconds
-    webSocket.current.onclose = () => {
+    webSocket.onclose = () => {
       console.log(new Date().toLocaleString(), 'closed');
       setConnected(false);
       clearInterval(pingPongInterval);
 
       const reconnectInterval = setInterval(() => {
         console.log(new Date().toLocaleString(), 'reconnecting');
-        webSocket.current = new WebSocket(URL);
-        webSocket.current.onopen = () => {
+        webSocket = new WebSocket(URL);
+        webSocket.onopen = () => {
           console.log(new Date().toLocaleString(), 'connected');
           setConnected(true);
           clearInterval(reconnectInterval);
@@ -69,14 +69,24 @@ const Room = (props: any) => {
     return () => {
       clearInterval(pingPongInterval);
     };
-  }, [webSocket.current]);
+  }, [webSocket]);
+
+  console.log(data);
 
   return (
     <div className='room-wrapper'>
-      <h3>Room {id}</h3>
-      <div className='room'>
-        <BingoBoard />
-        <BingoBoard />
+      <h1 className='bold'>Room {id}</h1>
+      {/* <h2 className='bold'>Current turn {data?.next_move?.toString()}</h2> */}
+      <div style={{ display: 'flex', gap:'200px' }}>
+        {data?.boards?.map((board: any, index: number) => {
+          console.log('board', board);
+
+          return (
+            <div key={index} className='room-board'>
+              <BingoBoard board={board} current={data?.next_move?.toString()} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

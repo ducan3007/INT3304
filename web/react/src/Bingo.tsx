@@ -1,4 +1,5 @@
 import React from 'react';
+import History from './History';
 
 const BingoBoard = (props: any) => {
   const data = [
@@ -10,16 +11,35 @@ const BingoBoard = (props: any) => {
   ];
   console.log(props);
 
+  const [board, setBoard] = React.useState();
+
+  React.useEffect(() => {
+    setBoard(props?.board?.board);
+  }, []);
+
+  const myTurn = props?.board?.uid === props?.current ? true : false;
+
   return (
     <div className='bingo-board'>
-      {data.map((row, index) => {
+      {props?.board?.uid && (
+        <h2 className={`next_move ${myTurn ? 'text-secondary' : ''}`}>
+          {myTurn ? 'ĐẾN LƯỢT ' : ''} ID: {props?.board?.uid}
+        </h2>
+      )}
+
+      {props?.board?.board.map((row: any, index: number) => {
         return (
           <div className='row' key={index}>
-            {row.map((column, index) => {
-              // for (const i in props?.history) {
-              //   const pos = props?.history[i];
-              // }
-              return <Square key={index}>{column}</Square>;
+            {row.map((column: number, index: number) => {
+              return (
+                <Square
+                  board={props?.board?.board}
+                  history={props?.board?.history || {}}
+                  key={index}
+                >
+                  {column}
+                </Square>
+              );
             })}
           </div>
         );
@@ -28,9 +48,24 @@ const BingoBoard = (props: any) => {
   );
 };
 
-const Square = (props: any) => {
+export const Square = (props: any) => {
+  console.log(props?.history);
+
+  const isSelect = React.useMemo(() => {
+    for (const i in props?.history) {
+      const x = props?.history[i][0];
+      const y = props?.history[i][1];
+      if (props?.children === props?.board[y][x]) {
+        return true;
+      }
+    }
+  }, [props?.history]);
+
   return (
-    <div className={props?.selected ? 'square selected' : 'square non-selected'}>
+    <div
+      style={{ fontSize: '30px', fontWeight: 'bold' }}
+      className={isSelect ? 'square selected' : 'square non-selected'}
+    >
       {props.children}
     </div>
   );

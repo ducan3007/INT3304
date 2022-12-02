@@ -20,7 +20,7 @@ class Bingo:
 
         # Số hàng và cột
         self.x = int(x)
-
+        self.win = False
         # Lưu lịch sử
         self.history = dict()  # {num: (pos_x, pos_y)}
 

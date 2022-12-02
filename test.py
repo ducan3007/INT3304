@@ -13,15 +13,17 @@ if __name__ == '__main__':
 
     print('history from redis: ', type(get_history))
 
-    histories = []
-    for i in range(len(get_history)):
-        temp = {
-            'time': get_history[i][1],
-            'data': protocol.redis_decode_history(get_history[i][0])
-        }
-        histories.append(temp)
+    # histories = []
+    # for i in range(len(get_history)):
+    #     temp = {
+    #         'time': get_history[i][1],
+    #         'data': protocol.redis_decode_history(get_history[i][0])
+    #     }
+    #     histories.append(temp)
 
-    print('history from redis: ', histories)
+    print(redisClient.get('abc'))
+
+    # print('history from redis: ', histories)
 
     # Sau khi chơi xong, gọi thằng này để Lịch sử chơi
     # protocol.redis_decode_history(get_history)
