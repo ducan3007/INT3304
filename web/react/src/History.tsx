@@ -5,7 +5,7 @@ const History = (props: any) => {
   console.log('props', props);
 
   return (
-    <div>
+    <>
       {props?.history?.map((item: any, index: number) => {
         const matchTime = new Date(item?.time);
         return (
@@ -19,7 +19,7 @@ const History = (props: any) => {
             <div>Match ID : {item?.data?.match_id}</div>
             <div>Winner ID : {item?.data?.winner}</div>
 
-            <div style={{ display: 'flex', gap: '20px' }}>
+            <div style={{ display: 'flex', gap: '20px', border: '1px solid black' }}>
               <div>
                 Player 1: {item?.data?.uid_1}
                 {item?.data?.game_board_1.map((row: any, index: number) => {
@@ -64,7 +64,7 @@ const History = (props: any) => {
           </div>
         );
       })}
-    </div>
+    </>
   );
 };
 

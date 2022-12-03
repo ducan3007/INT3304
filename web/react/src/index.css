@@ -55,6 +55,12 @@ input {
   grid-gap: 1em;
   grid-auto-rows: minmax(100px, auto);
 }
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(700px, 1fr));
+  grid-gap: 1em;
+  grid-auto-rows: minmax(100px, auto);
+}
 .square {
   width: 100px;
   height: 100px;

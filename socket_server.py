@@ -22,7 +22,7 @@ HOST = 'localhost'
 PORT = 27003
 KEY = 'flag{1234567890}'
 
-LEVEL = 3  # 3x3
+LEVEL = 5  # 3x3
 
 redisClient = redis.Redis(host='localhost', port=6379, db=0, password="admin")
 
