@@ -12,9 +12,9 @@ msg2 = {"result": 0}
 data = {
     "action": 1,
     "match": 11,
-    "id1": 3,
-    "id2": 5,
-    "passwd": 123
+    "id1": id1,
+    "id2": id2,
+    "passwd": password
 }
 
 async def create(websocket):
@@ -29,5 +29,5 @@ async def create(websocket):
 async def server():
     async with websockets.serve(create, "localhost", 8881):
         await asyncio.Future()
-    asyncio.run(server())
+asyncio.run(server())
 
