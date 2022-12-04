@@ -1,33 +1,20 @@
 import asyncio
 import websockets
+import struct
 import json
 
-HOST = "127.0.0.1"
-PORT = 65432
-
-msg1 = {"result": 1, "ip": "localhost", "port": 10010, "path": "path"}
-
-msg2 = {"result": 0}
-
 data = {
-    "action": 1,
-    "match": 11,
-    "id1": id1,
-    "id2": id2,
-    "passwd": password
+    "result": 2,
+    "match": 8, # id của ván game
+    "status": 1,
+    "id1": 1000,
+    "id2": 100
 }
 
-async def create(websocket):
-    async for message in websocket:
-        data = json.loads(message)
-        print(data)
-        if data["action"] == 1:
-            await websocket.send(json.dumps(msg1))
-        else:
-            await websocket.send(json.dumps(msg2))
-
-async def server():
-    async with websockets.serve(create, "localhost", 8881):
-        await asyncio.Future()
-asyncio.run(server())
+async def hello():
+    async with websockets.connect("ws://104.194.240.16/ws/channels/") as websocket:
+        await websocket.send(json.dumps(data))
+        msg = await websocket.recv()
+        print(msg)
+asyncio.run(hello())
 
