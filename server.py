@@ -1,12 +1,12 @@
 import json
 import socket
-msg = {"result": 1, "ip": "localhost", "port": 10010, "path": "path"}
+msg = {"result": 1, "ip": "0.tcp.ap.ngrok.io", "port": 12592, "path": "path"}
 
 def server_program():
     # get the hostname
     host = 'localhost'
     # initiate port no above 1024
-    port = 8881
+    port = 80
 
     server_socket = socket.socket() # get instance
     # look closely, the bind() function takes tuple as argument
