@@ -26,30 +26,18 @@ LEVEL = 5  # 3x3
 
 redisClient = redis.Redis(host='localhost', port=6379, db=0, password="admin")
 
-# Clients = {id1: socket_client1, id2: socket_client2}}
 Clients = dict()
-
-# Bingos = {room_id: {uuid1: Bingo, uuid2: Bingo}}
 Bingos = dict()
 MatchID = dict()
-
-# Biến Global Dùng để lưu lượt đi tiếp theo
 NextMove = dict()
-
 History = dict()
-
-# For Redis
-
 RoomList = dict()
 
 
-# Khởi tạo mặc định 5 phòng có room_id từ 1 đến 5
 for i in range(10):
     Bingos[f'{i}'] = dict()
 
-# Chưa cần dùng đến
 MessageQueue = dict()
-
 
 class ClientThread(threading.Thread):
 

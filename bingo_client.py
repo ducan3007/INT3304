@@ -72,8 +72,7 @@ def receive():
                 case 201:  # Server trả về Gói tin bắt đầu game
                     bingo.x = protocol.deserialize_matrix(message[4:])[0]
                     bingo.game_board = protocol.deserialize_matrix(message[4:])[1]
-                
-                
+
                     # Them UI vao day
                     bingo.printBoard()
                     sys.stdout.write("\r{} {} \n".format("(Won, Can choose):", state.won, state.can_choose))
@@ -169,16 +168,19 @@ def write():
             if (user_input.strip().isdigit() is not True):
                 sys.stdout.write("Nhập lại số nguyên: \n")
                 message = ">"
+                user_input = None
                 continue
 
             if (int(user_input) < 1 or int(user_input) > 25):
                 sys.stdout.write("Nhập lại số nguyên từ 1 đến 25: \n")
                 message = ">"
+                user_input = None
                 continue
 
             if (bingo.isSelectedNumber(int(user_input)) is True):
                 sys.stdout.write("Số đã được chọn: \n")
                 message = ">"
+                user_input = None
                 continue
 
         else:
