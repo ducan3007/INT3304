@@ -8,8 +8,8 @@ from bingo import Bingo
 import sys
 import json
 
-HOST = 'localhost'  # Hoặc IP của máy
-PORT = 27003
+HOST = '0.tcp.ap.ngrok.io'  # Hoặc IP của máy
+PORT = 15786
 SECRET_KEY = '12345678'
 
 
