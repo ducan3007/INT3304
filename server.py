@@ -1,32 +1,27 @@
 import json
 import socket
-msg = {"result": 1, "ip": "0.tcp.ap.ngrok.io", "port": 17815, "path": "path"}
+msg = {"result": 1, "ip": "0.tcp.ap.ngrok.io", "port": 16666, "path": "path"}
 
 
 def server_program():
-    # get the hostname
     host = 'localhost'
-    # initiate port no above 1024
-    port = 3306
+    port = 27017
 
-    server_socket = socket.socket()  # get instance
-    # look closely, the bind() function takes tuple as argument
-    server_socket.bind((host, port))  # bind host address and port together
+    server_socket = socket.socket()
+    server_socket.bind((host, port))
 
-    # configure how many client the server can listen simultaneously
     server_socket.listen(2)
-    conn, address = server_socket.accept()  # accept new connection
+    conn, address = server_socket.accept()
     print("Connection from: " + str(address))
     while True:
-        # receive data stream. it won't accept data packet greater than 1024 bytes
-        data = conn.recv(1024).decode()
-        if not data:
-            # if data is not received break
-            break
-        print("form connected user: " + str(data))
-        # data = input(' -> ')
-        print((json.dumps(msg).encode()))
-        conn.send(json.dumps(msg).encode())  # send data to the client
+        try:
+            data = conn.recv(1024).decode()
+
+            print("form connected user: " + str(data))
+            conn.send(json.dumps(msg).encode())
+
+        except Exception as e:
+            print(e)
 
     conn.close()  # close the connection
 

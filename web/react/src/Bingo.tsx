@@ -9,7 +9,7 @@ const BingoBoard = (props: any) => {
     [16, 17, 18, 19, 20],
     [21, 22, 23, 24, 25]
   ];
-  console.log(props);
+
 
   const [board, setBoard] = React.useState();
 
@@ -49,7 +49,7 @@ const BingoBoard = (props: any) => {
 };
 
 export const Square = (props: any) => {
-  console.log(props?.history);
+  // console.log(props?.history);
 
   const isSelect = React.useMemo(() => {
     for (const i in props?.history) {

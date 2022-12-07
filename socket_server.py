@@ -19,7 +19,7 @@ import time
 # HOST = socket.gethostbyname(hostname)
 
 HOST = 'localhost'
-PORT = 27003
+PORT = 27004
 KEY = 'flag{1234567890}'
 
 LEVEL = 5  # 3x3
@@ -333,6 +333,7 @@ class ClientThread(threading.Thread):
             redis_data[room] = dict()
             redis_data[room]['players'] = []
             redis_data[room]['next_move'] = ''
+            
 
             for uuid in Bingos[room]:
                 redis_data[room]['players'].append(uuid)

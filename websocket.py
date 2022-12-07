@@ -86,7 +86,9 @@ async def main(ws, path):
                 else:
                     res.append({'uid': id_player_2, 'board': [], 'history': player_2_history or {}})
 
-                data = json.dumps({'msg': 'get', 'res': res, 'next_move': game_state[room_id]['next_move']})
+                data = json.dumps(
+                    {'msg': 'get', 'res': res, 'next_move': game_state[room_id]['next_move'],
+                     'winner': game_state[room_id].get('winner')})
                 await ws.send(data)
 
 

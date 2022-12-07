@@ -24,7 +24,7 @@ function App() {
     // Handle ping pong interval every 2 seconds
     let pingPongInterval: any;
 
-    console.log('run');
+    // console.log('run');
 
     if (webSocket.readyState !== WebSocket.CLOSED) {
       pingPongInterval = setInterval(() => {
@@ -44,7 +44,7 @@ function App() {
             for (var i in data?.game_state) result.push({ room_id: i, data: data?.game_state[i] });
             setGameState(result);
             setHistory(data?.game_history);
-            console.log(result);
+            // console.log(result);
         }
       };
     }

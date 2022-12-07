@@ -1,5 +1,7 @@
 from bingo import Bingo
+import numpy as np
 import protocol
+import random
 import redis
 import json
 import time
@@ -12,6 +14,9 @@ if __name__ == '__main__':
     get_history = redisClient.zrange("game_history", 0, -1, desc=True, withscores=True)
 
     print('history from redis: ', type(get_history))
+
+    a = random.sample(range(1, 10), 9)
+    print(a)
 
     # histories = []
     # for i in range(len(get_history)):

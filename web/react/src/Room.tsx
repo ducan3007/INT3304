@@ -10,6 +10,9 @@ type RoomProps = {
 export let webSocket = new WebSocket('ws://localhost:8081');
 
 const Room = (props: any) => {
+  const nextMoveRef = useRef('');
+  const gameEndRef = useRef(false);
+
   const { id } = useParams();
 
   const [data, setData] = useState<any>([]);
@@ -26,15 +29,16 @@ const Room = (props: any) => {
 
   // console.log(players);
 
-  console.log(id);
-
   useEffect(() => {
     // Handle ping pong interval every 2 seconds
     let pingPongInterval: any;
 
     if (webSocket.readyState !== WebSocket.CLOSED) {
       pingPongInterval = setInterval(() => {
-        console.log(new Date().toLocaleTimeString(), 'ping');
+        console.log(
+          new Date().toLocaleTimeString(),
+          JSON.stringify({ msg: 'detail', room_id: id })
+        );
 
         webSocket.send(JSON.stringify({ msg: 'detail', room_id: id }));
       }, 1000);
@@ -42,10 +46,31 @@ const Room = (props: any) => {
       webSocket.onmessage = (event) => {
         const message = JSON.parse(event.data);
 
-        setData({
-          boards: message?.res,
-          next_move: message?.next_move
-        });
+        console.log('message', message);
+        console.log('dataRef', nextMoveRef.current);
+
+        if ('' === nextMoveRef.current) {
+          nextMoveRef.current = message?.next_move;
+        }
+
+        if (nextMoveRef.current && '' === message?.next_move) {
+          gameEndRef.current = true;
+          const endText = document.getElementById('abc1');
+          if (endText) {
+            endText.style.display = 'block';
+          }
+          setTimeout(() => {
+            console.log('reload');
+            window.location.reload();
+          }, 5000);
+        }
+
+        if (!gameEndRef.current) {
+          setData({
+            boards: message?.res,
+            next_move: message?.next_move
+          });
+        }
       };
     }
 
@@ -71,16 +96,17 @@ const Room = (props: any) => {
     };
   }, [webSocket]);
 
-  console.log(data);
+  console.log('data', data);
 
   return (
     <div className='room-wrapper'>
       <h1 className='bold'>Room {id}</h1>
+      <h1 id='abc1' style={{ display: 'none' }}>
+        Trận đấu kết thúc
+      </h1>
       {/* <h2 className='bold'>Current turn {data?.next_move?.toString()}</h2> */}
-      <div style={{ display: 'flex', gap:'200px' }}>
+      <div style={{ display: 'flex', gap: '200px' }}>
         {data?.boards?.map((board: any, index: number) => {
-          console.log('board', board);
-
           return (
             <div key={index} className='room-board'>
               <BingoBoard board={board} current={data?.next_move?.toString()} />

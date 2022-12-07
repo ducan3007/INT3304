@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+import numpy as np
 import threading
 from struct import *
 import socket
@@ -8,8 +8,9 @@ from bingo import Bingo
 import sys
 import json
 
-HOST = '0.tcp.ap.ngrok.io'  # Hoặc IP của máy
-PORT = 15786
+
+HOST = 'localhost'  # Hoặc IP của máy
+PORT = 27004
 SECRET_KEY = '12345678'
 
 
@@ -24,6 +25,7 @@ INPUT = None
 
 ReceivedThread = False
 bingo = Bingo(5)
+random_number = []
 
 
 def red(str):
@@ -52,6 +54,7 @@ def send_pkt_hello():  # khởi tạo kết nối
 def receive():
     global state
     global ReceivedThread
+    global random_number
 
     send_pkt_hello()
     while True:
@@ -70,8 +73,12 @@ def receive():
                     sys.stdout.write("\r{} {} \n".format(f'{green(100)} :', protocol._get_str(message[8:8+len])))
 
                 case 201:  # Server trả về Gói tin bắt đầu game
+                    import random
                     bingo.x = protocol.deserialize_matrix(message[4:])[0]
                     bingo.game_board = protocol.deserialize_matrix(message[4:])[1]
+
+                    # random mang co bingo.x so
+                    random_number = random.sample(range(1, bingo.x**2 + 1), bingo.x**2)
 
                     # Them UI vao day
                     bingo.printBoard()
@@ -87,6 +94,7 @@ def receive():
                 case 205:  # Gói tin update nước đi
                     n = protocol._get_ints(message[4:8])
                     sys.stdout.write("\r{} {} \n".format(f'{green(205)} :', f'Đối thủ chọn {n}!'))
+                    random_number.remove(n)
                     bingo.update_and_print(int(n))
 
                 case 222:  # Hiển thị kết quả của người choi còn lại, data là matrix và history
@@ -153,41 +161,45 @@ message = "Nhập số nguyên: \n"
 def write():
     global message
     global ReceivedThread
+    global random_number
     while True:
-        sleep(0.1)
+        sleep(1)
         if ReceivedThread is not True:
             continue
 
         if (state.won is True):
             break
-        else:
-            user_input = input(message)
-
+        # else:
+        #     user_input = random_number.pop()
+        #     sys.stdout.write("\r{} \n".format(f'{user_input} : PICK !.'))
         if (state.can_choose is True):
+            pass
+            # if (user_input.strip().isdigit() is not True):
+            #     sys.stdout.write("Nhập lại số nguyên: \n")
+            #     message = ">"
+            #     user_input = None
+            #     continue
 
-            if (user_input.strip().isdigit() is not True):
-                sys.stdout.write("Nhập lại số nguyên: \n")
-                message = ">"
-                user_input = None
-                continue
+            # if (int(user_input) < 1 or int(user_input) > 25):
+            #     sys.stdout.write("Nhập lại số nguyên từ 1 đến 25: \n")
+            #     message = ">"
+            #     user_input = None
+            #     continue
 
-            if (int(user_input) < 1 or int(user_input) > 25):
-                sys.stdout.write("Nhập lại số nguyên từ 1 đến 25: \n")
-                message = ">"
-                user_input = None
-                continue
-
-            if (bingo.isSelectedNumber(int(user_input)) is True):
-                sys.stdout.write("Số đã được chọn: \n")
-                message = ">"
-                user_input = None
-                continue
+            # if (bingo.isSelectedNumber(int(user_input)) is True):
+            #     sys.stdout.write("Số đã được chọn: \n")
+            #     message = ">"
+            #     user_input = None
+            #     continue
 
         else:
             sys.stdout.write("Chưa đến lượt: \n")
             message = ">"
 
-        if state.can_choose is True and user_input.strip().isdigit() and int(user_input) in range(1, bingo.size()+1):
+        if state.can_choose is True:
+            user_input = random_number.pop()
+            # sys.stdout.write(''.join(str(x) for x in random_number))
+            sys.stdout.write("\r{} \n".format(''.join(str(x) for x in random_number)))
             state.can_choose = False
             bingo.update_and_print(int(user_input))
             message = "Nhập số nguyên: \n"
