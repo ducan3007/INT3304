@@ -34,6 +34,14 @@ def _int_to_bytes(num):
 # Common: Đổi string thành bytes
 
 
+def redis_save_match(package):
+    data_len = _get_ints(package[4:8])
+    print(data_len)
+    data_str = package[8:8+data_len].decode()
+    print(data_str)
+    return data_str.split(':')
+
+
 def _get_str(data):
     return data.decode()
 

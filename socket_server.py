@@ -39,6 +39,7 @@ for i in range(10):
 
 MessageQueue = dict()
 
+
 class ClientThread(threading.Thread):
 
     def __init__(self, conn, address: str):
@@ -58,6 +59,10 @@ class ClientThread(threading.Thread):
         self.uuid = create_uuid()
         self.winner = ''
 
+        self.matchId = ''
+        self.id_1 = ''
+        self.id_2 = ''
+
         try:
             while True:
 
@@ -73,6 +78,12 @@ class ClientThread(threading.Thread):
 
                         Clients[self.uuid] = conn
                         print(f'0 : Client {self.uuid} connected')
+
+                        data = protocol.redis_save_match(self.data)
+                        self.id_1 = data[0]
+                        self.id_2 = data[1]
+                        self.matchId = data[2]
+
                         self.accept_connection()
 
                         # Tìm trận, sẽ gửi hai matrix cho hai người
@@ -136,6 +147,8 @@ class ClientThread(threading.Thread):
 
                         # 888 : Nếu cả hai thắng thì gửi thông báo hòa, gửi kết qủa cho hai người chơi
                         if self.getBingo().isWin() and self.getOpponentBingo().isWin():
+                            redisClient.set(f'game_server:{self.matchId}',
+                                            self.id_1+':'+self.id_2+':'+self.matchId+':'+'2')
                             print('888 : Hòa')
                             self.bingo.win = True
                             self.getOpponentBingo().win = True
@@ -150,6 +163,8 @@ class ClientThread(threading.Thread):
 
                         # 777 : Mình thắng, bên kia thua
                         if self.getBingo().isWin():
+                            redisClient.set(f'game_server:{self.matchId}',
+                                            self.id_1+':'+self.id_2+':'+self.matchId+':'+'2')
                             self.bingo.win = True
                             print('777 : ', self.uuid, ' win')
 
@@ -162,6 +177,8 @@ class ClientThread(threading.Thread):
                                     self.sent_result_matrix_to_all()
 
                         if self.getOpponentBingo().isWin():
+                            redisClient.set(f'game_server:{self.matchId}',
+                                            self.id_1+':'+self.id_2+':'+self.matchId+':'+'2')
                             self.getOpponentBingo().win = True
                             print('777 2 : ', ooponent_id, ' win')
 
@@ -240,6 +257,8 @@ class ClientThread(threading.Thread):
                 self.match_id = MatchID[Room]
                 NextMove[self.room_id] = self.uuid
 
+                redisClient.set(f'game_server:{self.matchId}', self.id_1+':'+self.id_2+':'+self.matchId+':'+'1')
+
                 # Lưu lại phòng của người chơi
                 print(f'Player {self.uuid} matched room {self.room_id}')
                 return True
@@ -305,6 +324,7 @@ class ClientThread(threading.Thread):
 
         # gửi thông báo Chiến thắng cho đối thủ
         opponent_id = self.get_opponent_id()
+        redisClient.set(f'game_server:{self.matchId}', self.id_1+':'+self.id_2+':'+self.matchId+':'+'2')
 
         if (opponent_id is not None):
             print('999: ', opponent_id)
@@ -333,7 +353,6 @@ class ClientThread(threading.Thread):
             redis_data[room] = dict()
             redis_data[room]['players'] = []
             redis_data[room]['next_move'] = ''
-            
 
             for uuid in Bingos[room]:
                 redis_data[room]['players'].append(uuid)

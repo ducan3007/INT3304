@@ -1,11 +1,11 @@
 import json
 import socket
-msg = {"result": 1, "ip": "0.tcp.ap.ngrok.io", "port": 16666, "path": "path"}
+msg = {"result": 1, "ip": "0.tcp.ap.ngrok.io", "port": 18920, "path": "path"}
 
 
 def server_program():
     host = 'localhost'
-    port = 27017
+    port = 27018
 
     server_socket = socket.socket()
     server_socket.bind((host, port))
@@ -22,8 +22,9 @@ def server_program():
 
         except Exception as e:
             print(e)
+            # break
 
-    conn.close()  # close the connection
+    # conn.close()  # close the connection
 
 
 if __name__ == '__main__':

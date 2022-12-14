@@ -44,11 +44,17 @@ class GameState:
 
 state = GameState()
 
+id1 = '1'
+id2 = '8'
+matchid = '391'
+password = 'password123'
+
 
 def send_pkt_hello():  # khởi tạo kết nối
     type = int.to_bytes(0, 4, 'little')
-    print(SECRET_KEY)
-    client.sendall(type + SECRET_KEY.encode())
+    cred = id1 + ':' + id2 + ':' + matchid + ':' + password
+    pkt_len = int.to_bytes(len(cred), 4, 'little')
+    client.sendall(type + pkt_len + cred.encode())
 
 
 def receive():
