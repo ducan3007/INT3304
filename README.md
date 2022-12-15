@@ -8,6 +8,8 @@ $ docker compose up -d
 + `bingo_client.py`: Client game, BOT kết nối đến socket_server.py.
 + `web/react`: UI của Server game, cho phép theo dõi trận đấu, lịch sử. Kết nối đến websocket.py
 + `websocket.py`: Websocket Server, lấy data từ Redis, gửi đến UI.
++ `Bingo.py`: Class Bingo chính của game.
++ `protocol.py`: Giao thức chung giữa Client và Server.
 + `server.py`: Socket Server, kết nối đến Game Server 104.194.240.16.
 + `status.py`: Websocket Server, gửi status đến Game Server 104.194.240.16.
 
