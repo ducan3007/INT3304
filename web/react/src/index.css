@@ -75,9 +75,10 @@ input {
   align-items: center;
 }
 .room-wrapper {
-  width: 1480px;
+  /* display: flex; */
+  width: 100vh;
   padding: 1em;
-  margin: 0 auto;
+  
 }
 .next_move {
   color: #30b050;

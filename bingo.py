@@ -75,7 +75,7 @@ class Bingo:
     # ờng thẳng
     def isWin(self):
         lines = 0
-        print(self.x)
+        # print(self.x)
         for i in range(self.x):
             if self.game_info["row"][i] == self.x:
                 lines += 1
@@ -126,7 +126,7 @@ class Bingo:
         data_type = self.game_board.dtype.name
         shape = self.game_board.shape
         bytes = self.game_board.tobytes()
-        print(len(data_type.encode()))
+        # print(len(data_type.encode()))
         return data_type.encode() + protocol._int_to_bytes(shape[0]) + protocol._int_to_bytes(len(bytes)) + bytes
 
     def size(self):
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     while matrix.strip().isdigit() is not True:
 
         matrix = input("Nhập kích thước mảng ")
-        print(type(matrix))
+        # print(type(matrix))
 
     Bingo = Bingo(int(matrix))
     Bingo.board()

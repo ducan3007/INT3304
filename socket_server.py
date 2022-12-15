@@ -22,7 +22,7 @@ HOST = 'localhost'
 PORT = 27004
 KEY = 'flag{1234567890}'
 
-LEVEL = 5  # 3x3
+LEVEL = 7  # 3x3
 
 redisClient = redis.Redis(host='localhost', port=6379, db=0, password="admin")
 
@@ -219,7 +219,7 @@ class ClientThread(threading.Thread):
 
     # Gửi kết quả ma trận cho cả hai khi vấn đấu kết thúc
     def sent_result_matrix_to_all(self):
-        print("SEND TO ALLL")
+
         opponent_history = json.dumps(self.getOpponentBingo().history)
         my_history = json.dumps(self.getBingo().history)
 

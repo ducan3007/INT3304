@@ -24,7 +24,8 @@ UUID = 0
 INPUT = None
 
 ReceivedThread = False
-bingo = Bingo(5)
+bingo = Bingo(20)
+SLEEP_TIME = 0.1
 random_number = []
 
 
@@ -46,8 +47,8 @@ state = GameState()
 
 id1 = '1'
 id2 = '8'
-matchid = '391'
-password = 'password123'
+matchid = '404'
+password = 'password999'
 
 
 def send_pkt_hello():  # khởi tạo kết nối
@@ -66,7 +67,7 @@ def receive():
     while True:
 
         try:
-            message = client.recv(1024)
+            message = client.recv(8192)
             TYPE = protocol._get_type(message)
 
             match TYPE:
@@ -104,22 +105,25 @@ def receive():
                     bingo.update_and_print(int(n))
 
                 case 222:  # Hiển thị kết quả của người choi còn lại, data là matrix và history
+
                     sys.stdout.write("\r{} {} \n".format(f'{green(222)} :', f'Kết quả của đối thủ'))
 
                     n = protocol._get_ints(message[4:8])
+
                     matrix = protocol.deserialize_matrix(message[8:8+n])
 
                     m = protocol._get_ints(message[8+n:12+n])
+
                     history_temp = json.loads(message[12+n:12+n+m].decode())
 
-                    history = dict()
+                    historyDict = dict()
 
                     for i in history_temp:
-                        history[int(i)] = (history_temp[i][0], history_temp[i][1])
+                        historyDict[int(i)] = (history_temp[i][0], history_temp[i][1])
 
                     opponent_bingo = Bingo(matrix[0])
                     opponent_bingo.game_board = matrix[1]
-                    opponent_bingo.history = history
+                    opponent_bingo.history = historyDict
                     opponent_bingo.printBoard()
 
                     state.won = True
@@ -141,7 +145,7 @@ def receive():
                     sys.exit()
 
                 case 888:
-                    sys.stdout.write("\r{} \n".format(f'{green(999)} : Hòa.'))
+                    sys.stdout.write("\r{} \n".format(f'{green(888)} : Hòa.'))
 
                 case 777:
                     sys.stdout.write(f'{red(777)} : THUA !')
@@ -169,7 +173,7 @@ def write():
     global ReceivedThread
     global random_number
     while True:
-        sleep(1)
+        sleep(SLEEP_TIME)
         if ReceivedThread is not True:
             continue
 

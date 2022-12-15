@@ -36,9 +36,9 @@ def _int_to_bytes(num):
 
 def redis_save_match(package):
     data_len = _get_ints(package[4:8])
-    print(data_len)
+    # print(data_len)
     data_str = package[8:8+data_len].decode()
-    print(data_str)
+    # print(data_str)
     return data_str.split(':')
 
 
@@ -48,6 +48,7 @@ def _get_str(data):
 
 # Common: Lấy type của package
 def _get_type(data):
+    
     if (len(data) >= 4):
         type = int.from_bytes(data[:4], 'little')
         return type

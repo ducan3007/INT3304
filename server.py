@@ -1,6 +1,10 @@
 import json
 import socket
-msg = {"result": 1, "ip": "0.tcp.ap.ngrok.io", "port": 18920, "path": "path"}
+import redis
+
+msg = {"result": 1, "ip": "0.tcp.ap.ngrok.io", "port": 13337, "path": "path"}
+
+redisClient = redis.Redis(host='localhost', port=6379, db=0, password="admin")
 
 
 def server_program():
@@ -16,15 +20,16 @@ def server_program():
     while True:
         try:
             data = conn.recv(1024).decode()
-
-            print("form connected user: " + str(data))
+            temp = json.loads(data)
+            print(temp)
+            redisClient.set(f'match:{temp["match"]}', str(data))
             conn.send(json.dumps(msg).encode())
 
         except Exception as e:
             print(e)
-            # break
+            break
 
-    # conn.close()  # close the connection
+    conn.close()  # close the connection
 
 
 if __name__ == '__main__':

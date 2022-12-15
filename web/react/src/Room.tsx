@@ -41,7 +41,7 @@ const Room = (props: any) => {
         );
 
         webSocket.send(JSON.stringify({ msg: 'detail', room_id: id }));
-      }, 1000);
+      }, 100);
 
       webSocket.onmessage = (event) => {
         const message = JSON.parse(event.data);
