@@ -1,11 +1,16 @@
 ```
 $ py -m venv .venv
-
-+ An: Logic phần bingo
-+ Ánh: Phần giao thúc game (PKT_HELLO, ..)
-+ Hoàng: Phần giao thức của Cơ
-+ Đăng: Phần giao diện console
+$ pip install -r requirements.txt
+$ docker compose up -d
 ```
+
++ `socket_server.py`: Socket Server, game chính giữa hai người chơi, lưu data và Redis
++ `bingo_client.py`: Client game, BOT kết nối đến socket_server.py.
++ `web/react`: UI của Server game, cho phép theo dõi trận đấu, lịch sử. Kết nối đến websocket.py
++ `websocket.py`: Websocket Server, lấy data từ Redis, gửi đến UI.
++ `server.py`: Socket Server, kết nối đến Game Server 104.194.240.16.
++ `status.py`: Websocket Server, gửi status đến Game Server 104.194.240.16.
+
 
 Render bảng -> Bắt nhập số hàng cột -> Bảng -> Chọn số -> Validate số, lấy vị trí số trong bảng,số bị chọn hiện thị với màu khác -> Render
 
@@ -76,4 +81,6 @@ Sau khi chơi xong `S` gửi lại thông tin cho `A`. [
 + status(0,1,2 tương ứng vs chưa bắt đầu, đang diễn ra, kết thúc), 
 + [score1(int4 byte, điểm uid1), 
 + score(int 4 byte, điểm uid2) chỉ cần gửi với status =1 hoặc 2]]
+
+
 
